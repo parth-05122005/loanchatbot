@@ -1,4 +1,8 @@
 from typing import Dict, Any
+from app.core.logger import StructuredLogger
+import uuid
+
+logger = StructuredLogger("MasterAgent")
 
 
 class MasterAgent:

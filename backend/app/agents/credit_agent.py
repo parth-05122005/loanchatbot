@@ -1,4 +1,8 @@
 from typing import Optional, Dict, Any
+from app.core.logger import StructuredLogger
+
+logger = StructuredLogger("CreditAgent")
+
 
 class CreditAgent:
     """

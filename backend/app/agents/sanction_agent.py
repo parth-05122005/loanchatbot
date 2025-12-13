@@ -1,7 +1,9 @@
 from typing import Dict, Any
 from uuid import uuid4
 from datetime import datetime, timezone
+from app.core.logger import StructuredLogger
 
+logger = StructuredLogger("SanctionAgent")
 
 class SanctionAgent:
     """

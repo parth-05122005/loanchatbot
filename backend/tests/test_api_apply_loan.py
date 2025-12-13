@@ -1,18 +1,10 @@
-import pytest
 from fastapi.testclient import TestClient
-
 from app.main import app
-
 
 client = TestClient(app)
 
 
 def test_apply_loan_happy_path():
-    """
-    Full API test:
-    HTTP → FastAPI → MasterAgent → response
-    """
-
     payload = {
         "pan": "ABCDE1234F",
         "loan_amount": 100000,
@@ -27,15 +19,12 @@ def test_apply_loan_happy_path():
 
     data = response.json()
 
+    assert data["status"] == "SUCCESS"
     assert data["stage"] == "SANCTION"
-    assert data["result"]["status"] == "SANCTIONED"
-    assert "sanction_id" in data["result"]
-    
-def test_apply_loan_kyc_failure():
-    """
-    API should stop processing if KYC fails.
-    """
+    assert data["data"]["status"] == "SANCTIONED"
 
+
+def test_apply_loan_kyc_failure():
     payload = {
         "pan": "BADKYC9999",
         "loan_amount": 100000,
@@ -49,5 +38,6 @@ def test_apply_loan_kyc_failure():
 
     data = response.json()
 
+    assert data["status"] == "FAILURE"
     assert data["stage"] == "KYC"
-    assert data["result"]["status"] in ["FAILED", "INCOMPLETE"]
+    assert data["error"]["code"] in ["FAILED", "INCOMPLETE"]

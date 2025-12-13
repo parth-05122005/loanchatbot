@@ -1,6 +1,8 @@
 from typing import Dict, Any
 
+from app.core.logger import StructuredLogger
 
+logger = StructuredLogger("SalesAgent")
 class SalesAgent:
     """
     SalesAgent responsibilities:
