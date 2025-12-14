@@ -1,0 +1,18 @@
+
+SANCTION LETTER
+===========================
+
+Sanction ID   : d95b99be-a956-4cad-a987-5762fd0f9ace
+Sanction Date : 2025-12-14T20:12:44.808872+00:00
+
+Approved Loan Details
+---------------------
+Loan Amount   : N/A
+Tenure        : N/A months
+Interest Rate : 14%
+EMI           : 4801.29
+Credit Score  : 780
+
+This loan has been sanctioned based on automated credit assessment.
+
+-- AI Loan Processing System

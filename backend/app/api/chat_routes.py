@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+import os
+
 from app.services.session_store import SessionStore
 from app.services.llm_service import LLMService
 from app.agents.chat_agent import ChatAgent
@@ -10,7 +12,6 @@ from app.agents.credit_agent import CreditAgent
 from app.agents.sanction_agent import SanctionAgent
 from app.services.crm_service import CRMService
 from app.services.credit_score_service import CreditScoreService
-import os
 
 router = APIRouter()
 sessions = SessionStore()
@@ -34,7 +35,13 @@ class ChatRequest(BaseModel):
 
 @router.post("/chat")
 async def chat(req: ChatRequest):
-    state = sessions.get(req.session_id)
+    # ✅ Always start with a dict
+    state = sessions.get(req.session_id) or {}
+
     result = await chat_agent.handle_message(req.message, state)
-    sessions.save(req.session_id, result["state"])
+
+    # ✅ Persist state only if present
+    if "state" in result:
+        sessions.save(req.session_id, result["state"])
+
     return result

@@ -46,6 +46,13 @@ class MasterAgent:
             monthly_income=monthly_income,
         )
 
+        if loan_request.get("status") == "REJECT":
+            return {
+                "stage": "SALES",
+                "result": loan_request
+            }
+
+
         # -----------------------------
         # 2. KYC Agent
         # -----------------------------
