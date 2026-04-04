@@ -9,7 +9,17 @@ logger = StructuredLogger("SanctionAgent")
 
 
 class SanctionAgent:
-    OUTPUT_DIR = "app/static/outputs"
+    # FIX: was "app/static/outputs" — relative path breaks on Render because
+    # the server working directory is not guaranteed to be the project root.
+    # Built as absolute path from this file's location — always resolves correctly.
+    OUTPUT_DIR = os.path.join(
+        os.path.dirname(                    # app/agents/ → app/
+            os.path.dirname(                # app/ → backend/
+                os.path.abspath(__file__)
+            )
+        ),
+        "static", "outputs"
+    )
 
     def sanction_loan(self, credit_decision: Dict[str, Any]) -> Dict[str, Any]:
         status = credit_decision.get("status")
@@ -62,14 +72,12 @@ class SanctionAgent:
     ) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-        # FIX: loan_amount and tenure now exist in credit_decision
-        # (credit_agent.py adds them to every return via the base dict)
         loan_amount = credit_decision.get("loan_amount", "N/A")
         tenure = credit_decision.get("tenure", "N/A")
         emi = credit_decision.get("emi", "N/A")
         score = credit_decision.get("score", "N/A")
 
-        with open(file_path, "w",encoding="utf-8") as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(f"""
 SANCTION LETTER
 ===========================
@@ -79,10 +87,10 @@ Sanction Date : {sanction_date}
 
 Approved Loan Details
 ---------------------
-Loan Amount   : ₹{loan_amount:,.2f}
+Loan Amount   : Rs. {loan_amount:,.2f}
 Tenure        : {tenure} months
 Interest Rate : 14%
-EMI           : ₹{emi:,.2f}
+EMI           : Rs. {emi:,.2f}
 Credit Score  : {score}
 
 This loan has been sanctioned based on automated credit assessment.

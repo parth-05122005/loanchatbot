@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 
+// FIX: was hardcoded "http://127.0.0.1:8000" in 2 places.
+// Now reads from Vite env variable so dev and prod point to different backends
+// automatically — no code change needed between environments.
+const API_URL = import.meta.env.VITE_API_URL;
+
 function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sessionId, setSessionId] = useState(crypto.randomUUID());
-  const [sanctionUrl, setSanctionUrl] = useState(null); // FIX: was storing full decision object,
-                                                         // only need the download URL
-  const [isLoading, setIsLoading] = useState(false);    // FIX: added loading state so user knows
-                                                         // backend is processing
+  const [sanctionUrl, setSanctionUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -24,7 +27,7 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/chat", {
+      const response = await fetch(`${API_URL}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -40,10 +43,6 @@ function App() {
         { role: "bot", text: data.reply || "Something went wrong." },
       ]);
 
-      // FIX: backend returns sanction_letter_url as a top-level field directly
-      // on the response — not nested inside data.decision.result.document.
-      // Old code: data.decision?.result?.document?.download_url → always undefined
-      // New code: data.sanction_letter_url → correct
       if (data.sanction_letter_url) {
         setSanctionUrl(data.sanction_letter_url);
       }
@@ -69,7 +68,6 @@ function App() {
     <div className="app">
       <div className="chat-container">
 
-        {/* Header */}
         <div className="chat-header">
           Loan Assistant
           <button className="new-chat-btn" onClick={resetChat}>
@@ -77,7 +75,6 @@ function App() {
           </button>
         </div>
 
-        {/* Messages */}
         <div className="chat-body">
           {messages.map((msg, index) => (
             <div
@@ -88,23 +85,16 @@ function App() {
             </div>
           ))}
 
-          {/* Loading indicator while backend processes */}
           {isLoading && (
-            <div className="message bot">
-              Processing...
-            </div>
+            <div className="message bot">Processing...</div>
           )}
 
-          {/* FIX: sanction letter download — now reads from sanctionUrl state
-              which is set from data.sanction_letter_url (top-level field).
-              Previously read from data.decision.result.document.download_url
-              which never existed in the chat API response. */}
           {sanctionUrl && (
             <div className="message bot">
               <strong>Sanction Letter Ready</strong>
               <br />
               <a
-                href={`http://127.0.0.1:8000${sanctionUrl}`}
+                href={`${API_URL}${sanctionUrl}`}
                 target="_blank"
                 rel="noreferrer"
                 style={{ color: "#60a5fa" }}
@@ -117,7 +107,6 @@ function App() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
         <div className="chat-input">
           <input
             type="text"
