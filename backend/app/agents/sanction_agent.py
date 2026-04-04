@@ -9,29 +9,21 @@ logger = StructuredLogger("SanctionAgent")
 
 
 class SanctionAgent:
-    """
-    SanctionAgent responsibilities:
-    - Issue final loan sanction
-    - Generate sanction metadata
-    - Generate sanction letter artifact
-    """
-
     OUTPUT_DIR = "app/static/outputs"
 
     def sanction_loan(self, credit_decision: Dict[str, Any]) -> Dict[str, Any]:
         status = credit_decision.get("status")
 
-        if status not in ["AUTO_APPROVE", "CONDITIONAL_APPROVE"]:
+        if status not in ("AUTO_APPROVE", "CONDITIONAL_APPROVE"):
             logger.info("Loan not eligible for sanction", credit_status=status)
             return {
                 "status": "NOT_SANCTIONED",
                 "reason": "Loan not eligible for sanction",
-                "credit_status": status
+                "credit_status": status,
             }
 
         sanction_id = str(uuid4())
         sanction_date = datetime.now(timezone.utc).isoformat()
-
         file_name = f"sanction_{sanction_id}.txt"
         file_path = os.path.join(self.OUTPUT_DIR, file_name)
 
@@ -42,11 +34,7 @@ class SanctionAgent:
             sanction_date=sanction_date,
         )
 
-        logger.info(
-            "Loan sanctioned",
-            sanction_id=sanction_id,
-            credit_status=status
-        )
+        logger.info("Loan sanctioned", sanction_id=sanction_id, credit_status=status)
 
         return {
             "status": "SANCTIONED",
@@ -61,8 +49,8 @@ class SanctionAgent:
             "document": {
                 "type": "SANCTION_LETTER",
                 "file_name": file_name,
-                "download_url": f"/static/outputs/{file_name}"
-            }
+                "download_url": f"/static/outputs/{file_name}",
+            },
         }
 
     def _generate_sanction_letter(
@@ -72,15 +60,17 @@ class SanctionAgent:
         sanction_id: str,
         sanction_date: str,
     ) -> None:
-        """
-        Mock sanction letter generation.
-        (Can be replaced with real PDF later)
-        """
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-        with open(file_path, "w") as f:
-            f.write(
-                f"""
+        # FIX: loan_amount and tenure now exist in credit_decision
+        # (credit_agent.py adds them to every return via the base dict)
+        loan_amount = credit_decision.get("loan_amount", "N/A")
+        tenure = credit_decision.get("tenure", "N/A")
+        emi = credit_decision.get("emi", "N/A")
+        score = credit_decision.get("score", "N/A")
+
+        with open(file_path, "w",encoding="utf-8") as f:
+            f.write(f"""
 SANCTION LETTER
 ===========================
 
@@ -89,14 +79,13 @@ Sanction Date : {sanction_date}
 
 Approved Loan Details
 ---------------------
-Loan Amount   : {credit_decision.get("loan_amount", "N/A")}
-Tenure        : {credit_decision.get("tenure", "N/A")} months
+Loan Amount   : ₹{loan_amount:,.2f}
+Tenure        : {tenure} months
 Interest Rate : 14%
-EMI           : {credit_decision.get("emi")}
-Credit Score  : {credit_decision.get("score")}
+EMI           : ₹{emi:,.2f}
+Credit Score  : {score}
 
 This loan has been sanctioned based on automated credit assessment.
 
 -- AI Loan Processing System
-"""
-            )
+""")

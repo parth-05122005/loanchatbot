@@ -1,17 +1,20 @@
-from openai import OpenAI
+from google import genai
 
 
 class LLMService:
     def __init__(self, api_key: str):
-        self.client = OpenAI(api_key=api_key)
+        self.client = genai.Client(api_key=api_key)
 
     def chat(self, system_prompt: str, user_message: str) -> str:
-        response = self.client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message},
-            ],
-            temperature=0.4,
-        )
-        return response.choices[0].message.content
+        try:
+            prompt = f"System: {system_prompt}\nUser: {user_message}"
+
+            response = self.client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+
+            return response.text.strip()
+
+        except Exception as e:
+            return f"LLM Error: {str(e)}"

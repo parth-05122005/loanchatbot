@@ -14,8 +14,11 @@ class StructuredLogger:
         if not self.logger.handlers:
             self.logger.addHandler(handler)
 
-    def info(self, **kwargs):
-        self.logger.info(json.dumps(kwargs))
+    def info(self, message: str = "", **kwargs):
+        # FIX: accepts a positional message string + optional keyword context
+        payload = {"message": message, **kwargs}
+        self.logger.info(json.dumps(payload))
 
-    def error(self, **kwargs):
-        self.logger.error(json.dumps(kwargs))
+    def error(self, message: str = "", **kwargs):
+        payload = {"message": message, **kwargs}
+        self.logger.error(json.dumps(payload))

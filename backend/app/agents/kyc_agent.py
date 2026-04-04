@@ -1,7 +1,9 @@
 from typing import Dict, Any
 from app.core.logger import StructuredLogger
 
-logger = StructuredLogger("SalesAgent")
+# FIX: was StructuredLogger("SalesAgent") — KYC logs appeared as SalesAgent in output
+logger = StructuredLogger("KycAgent")
+
 
 class KycAgent:
     """
@@ -15,27 +17,18 @@ class KycAgent:
         self.crm_service = crm_service
 
     def verify_kyc(self, pan: str) -> Dict[str, Any]:
-        """
-        Fetch KYC details from CRM and evaluate status.
-        """
         kyc_data = self.crm_service.fetch_kyc(pan)
 
         if not kyc_data.get("kyc_verified"):
-            return {
-                "status": "FAILED",
-                "reason": "KYC not verified"
-            }
+            logger.info("KYC verification failed", pan=pan)
+            return {"status": "FAILED", "reason": "KYC not verified"}
 
         documents = kyc_data.get("documents", {})
         missing_docs = [doc for doc, present in documents.items() if not present]
 
         if missing_docs:
-            return {
-                "status": "INCOMPLETE",
-                "missing_documents": missing_docs
-            }
+            logger.info("KYC incomplete", pan=pan, missing=missing_docs)
+            return {"status": "INCOMPLETE", "missing_documents": missing_docs}
 
-        return {
-            "status": "VERIFIED",
-            "documents": documents
-        }
+        logger.info("KYC verified", pan=pan)
+        return {"status": "VERIFIED", "documents": documents}

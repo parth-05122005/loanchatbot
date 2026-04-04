@@ -65,13 +65,21 @@ def test_invalid_monthly_income():
 
 def test_no_matching_product():
     """
-    Loan amount outside supported product range should fail.
+    Loan amount outside supported product range should return a REJECT dict.
+    SalesAgent does NOT raise a ValueError for out-of-range amounts —
+    it returns {"status": "REJECT", "reason": "No suitable loan product available"}.
+    ValueError is only raised for negative/zero inputs (validate_input).
     """
     agent = SalesAgent()
 
-    with pytest.raises(ValueError, match="No suitable loan product found"):
-        agent.process_request(
-            loan_amount=5000000,  # exceeds max_amount
-            tenure_months=24,
-            monthly_income=100000,
-        )
+    # FIX: was pytest.raises(ValueError) — wrong.
+    # SalesAgent.build_loan_request() returns a reject dict for out-of-range amounts,
+    # it does not raise. Only negative/zero values trigger ValueError via validate_input.
+    result = agent.process_request(
+        loan_amount=5000000,  # exceeds max_amount of 2,000,000
+        tenure_months=24,
+        monthly_income=100000,
+    )
+
+    assert result["status"] == "REJECT"
+    assert result["reason"] == "No suitable loan product available"
