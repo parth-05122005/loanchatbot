@@ -41,13 +41,8 @@ env/
 # =========================
 backend/app/static/outputs/
 
-# =========================
-# Frontend / React
-# =========================
-node_modules/
-frontend/node_modules/
-frontend/dist/
-frontend/build/
+// check_model.py which I created to check the model which are ccurrently available in the gemini api. It is not used in the main code and is just for testing purposes. So, I have added it to the .gitignore file to avoid committing it to the repository.
+check_model.py
 
 # =========================
 # IDE / Editor

@@ -11,7 +11,7 @@ from app.api.chat_routes import router as chat_router
 
 app = FastAPI(title="Loan Processing System")
 
-allowed_origin = os.getenv("ALLOWED_ORIGIN", "http://localhost:5173")
+allowed_origin = os.getenv("ALLOWED_ORIGIN")
 
 app.add_middleware(
     CORSMiddleware,

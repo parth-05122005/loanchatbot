@@ -13,8 +13,8 @@ class SanctionAgent:
     # the server working directory is not guaranteed to be the project root.
     # Built as absolute path from this file's location — always resolves correctly.
     OUTPUT_DIR = os.path.join(
-        os.path.dirname(                    # app/agents/ → app/
-            os.path.dirname(                # app/ → backend/
+        os.path.dirname(                    # app/agents/file_name->agents
+            os.path.dirname(                # app/agents->app
                 os.path.abspath(__file__)
             )
         ),
